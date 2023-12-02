@@ -1,0 +1,10 @@
+﻿build*/
+debug*/
+release*/
+output*/
+
+*.exe
+*.dll
+*.lib
+*.ilk
+*.pdb
