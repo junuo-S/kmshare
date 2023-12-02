@@ -2,6 +2,7 @@
 debug*/
 release*/
 output*/
+cmake*/
 
 *.exe
 *.dll
