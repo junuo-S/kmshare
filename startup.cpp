@@ -1,10 +1,11 @@
 ﻿#include <iostream>
 
 #include "core/event/keyboardevent.h"
+#include "core/event/mouseevent.h"
 
 int main(int argc, char* argv[])
 {
-    KeyboardEvent event(91, KeyboardEvent::KeyMsgType::KeyDown);
+    MouseEvent event(MouseEvent::MouseMsgType::MouseMove, 320, 50, 50);
     event.post();
     return 0;
 }
