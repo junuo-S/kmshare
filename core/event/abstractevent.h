@@ -3,5 +3,5 @@
 class AbstractEvent
 {
 public:
-    virtual void post() = 0;
+    virtual void post() const = 0;
 };
