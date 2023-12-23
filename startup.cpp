@@ -1,11 +1,14 @@
 ﻿#include <iostream>
+#include <QApplication>
 
 #include "core/event/keyboardevent.h"
 #include "core/event/mouseevent.h"
+#include "gui/kmsharewindow.h"
 
 int main(int argc, char* argv[])
 {
-    MouseEvent event(MouseEvent::MouseMsgType::MouseMove, 320, 50, 50);
-    event.post();
-    return 0;
+    QApplication app(argc, argv);
+    KMShareWindow kmShareWindow;
+    kmShareWindow.show();
+    return app.exec();
 }

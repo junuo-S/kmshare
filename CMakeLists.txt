@@ -28,6 +28,15 @@ set(sources
 
     core/hook/hook.h
     core/hook/hook.cpp
+
+    gui/kmsharewindow.h
+    gui/kmsharewindow.cpp
+    gui/subwidget/serverwidget.h
+    gui/subwidget/serverwidget.cpp
+    gui/subwidget/clientwidget.h
+    gui/subwidget/clientwidget.cpp
+    gui/subwidget/devicewidget.h
+    gui/subwidget/devicewidget.cpp
 )
 
 junuo_auto_moc(generateFiles ${sources})
