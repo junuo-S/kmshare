@@ -23,6 +23,9 @@ set(sources
     core/event/keycodedefs.h
     core/event/mouseevent.h
     core/event/mouseevent.cpp
+
+    core/hook/hook.h
+    core/hook/hook.cpp
 )
 
 junuo_auto_moc(generateFiles ${sources})
