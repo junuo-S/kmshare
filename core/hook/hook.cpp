@@ -2,6 +2,8 @@
 
 #include <iostream>
 
+#include "core/event/eventqueue.h"
+
 HHOOK Hook::s_mouseHook = NULL;
 HHOOK Hook::s_keybroadHook = NULL;
 
@@ -15,7 +17,8 @@ LRESULT Hook::mouseProc(int nCode, WPARAM wParam, LPARAM lParam)
     if (nCode >= 0)
     {
         MSLLHOOKSTRUCT* mouseStruct = (MSLLHOOKSTRUCT*)lParam;
-        switch (wParam) {
+        switch (wParam)
+        {
             case WM_LBUTTONDOWN:
                 std::cout << "左键按下" << std::endl;
                 break;
@@ -46,6 +49,20 @@ LRESULT Hook::mouseProc(int nCode, WPARAM wParam, LPARAM lParam)
 LRESULT Hook::keybroadProc(int nCode, WPARAM wParam, LPARAM lParam)
 {
     return LRESULT();
+}
+
+MouseEvent* Hook::enqueueMouseEvent(MouseEvent::MouseMsgType msgType, int rate /*= 0*/, int dx /*= 0*/, int dy /*= 0*/)
+{
+    auto event = new MouseEvent(msgType, rate, dx, dy);
+    EventQueue::instance()->push(event);
+    return event;
+}
+
+KeyboardEvent* Hook::enqueueKeybroadEvent(unsigned int keyCode, KeyboardEvent::KeyMsgType msgType)
+{
+    auto event = new KeyboardEvent(keyCode, msgType);
+	EventQueue::instance()->push(event);
+	return event;
 }
 
 bool Hook::installGlobalKeybroadHook()

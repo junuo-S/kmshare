@@ -23,13 +23,15 @@ set(sources
     core/event/keycodedefs.h
     core/event/mouseevent.h
     core/event/mouseevent.cpp
+    core/event/eventqueue.h
+    core/event/eventqueue.cpp
 
     core/hook/hook.h
     core/hook/hook.cpp
 )
 
 junuo_auto_moc(generateFiles ${sources})
-
+include_directories(.)
 junuo_add_executable(kmshare WIN32 ${sources})
 junuo_use_Qt(kmshare Core Gui Widgets)
 junuo_add_generate_sources(kmshare ${generateFiles})
