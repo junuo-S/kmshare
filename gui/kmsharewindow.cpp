@@ -2,6 +2,7 @@
 
 #include "subwidget/clientwidget.h"
 #include "subwidget/serverwidget.h"
+#include "core/hook/hook.h"
 
 KMShareWindow::KMShareWindow(QWidget* parent)
 	: QWidget(parent)
@@ -11,4 +12,10 @@ KMShareWindow::KMShareWindow(QWidget* parent)
 {
 	m_vLayout->addWidget(m_clientWidget);
 	m_vLayout->addWidget(m_serverWidget);
+	Hook::installGlobalMouseHook();
+}
+
+KMShareWindow::~KMShareWindow()
+{
+	Hook::uninstallGlobalMouseHook();
 }

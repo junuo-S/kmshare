@@ -24,6 +24,7 @@ public:
     void setDy(int dy);
     int getDy() const;
     virtual void post() const override;
+    virtual std::string toString() override;
 
 private:
     void leftButtonDown() const;

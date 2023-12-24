@@ -41,6 +41,6 @@ set(sources
 
 junuo_auto_moc(generateFiles ${sources})
 include_directories(.)
-junuo_add_executable(kmshare WIN32 ${sources})
+junuo_add_executable(kmshare ${sources})
 junuo_use_Qt(kmshare Core Gui Widgets)
 junuo_add_generate_sources(kmshare ${generateFiles})

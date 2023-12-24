@@ -3,6 +3,8 @@
 #ifdef _WIN32
 #include <Windows.h>
 #endif
+#include <QJsonObject>
+#include <QJsonDocument>
 
 MouseEvent::MouseEvent(MouseMsgType msgType, int rate, int dx, int dy)
     : m_msgType(msgType)
@@ -79,6 +81,18 @@ void MouseEvent::post() const
     default:
         break;
     }
+}
+
+std::string MouseEvent::toString()
+{
+    QJsonObject json;
+    json.insert("className", "MouseEvent");
+    json.insert("m_msgType", (unsigned short)m_msgType);
+    json.insert("m_rate", m_rate);
+    json.insert("m_dx", m_dx);
+    json.insert("m_dy", m_dy);
+    QJsonDocument jsonDoc(json);
+    return jsonDoc.toJson().toStdString();
 }
 
 void MouseEvent::leftButtonDown() const

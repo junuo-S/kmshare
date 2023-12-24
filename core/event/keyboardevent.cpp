@@ -3,6 +3,8 @@
 #ifdef _WIN32
 #include "Windows.h"
 #endif
+#include <QJsonObject>
+#include <QJsonDocument>
 
 KeyboardEvent::KeyboardEvent(unsigned int keyCode, KeyboardEvent::KeyMsgType type)
     : m_keyCode(keyCode)
@@ -50,4 +52,15 @@ void KeyboardEvent::post() const
     if (msgId != -1)
         PostMessageA(hWnd, msgId, m_keyCode, 0);
 }
+
+std::string KeyboardEvent::toString()
+{
+    QJsonObject json;
+    json.insert("className", "KeyboardEvent");
+    json.insert("m_keyCode", (int)m_keyCode);
+    json.insert("m_msgType", (unsigned short)m_msgType);
+    QJsonDocument jsonDoc(json);
+    return jsonDoc.toJson().toStdString();
+}
+
 #endif

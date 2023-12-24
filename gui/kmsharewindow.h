@@ -10,6 +10,7 @@ class KMShareWindow : public QWidget
 {
 public:
 	KMShareWindow(QWidget* parent = nullptr);
+	~KMShareWindow();
 
 private:
 	ClientWidget* m_clientWidget = nullptr;

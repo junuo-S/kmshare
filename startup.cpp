@@ -10,5 +10,7 @@ int main(int argc, char* argv[])
     QApplication app(argc, argv);
     KMShareWindow kmShareWindow;
     kmShareWindow.show();
+    AbstractEvent* event = new MouseEvent(MouseEvent::MouseMsgType::LeftButtonClicked);
+    std::cout << event->toString() << std::endl;
     return app.exec();
 }

@@ -3,6 +3,7 @@ debug*/
 release*/
 output*/
 cmake*/
+.vscode/
 
 *.exe
 *.dll
