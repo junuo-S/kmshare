@@ -23,7 +23,10 @@ private:
     static LRESULT CALLBACK keybroadProc(int nCode, WPARAM wParam, LPARAM lParam);
     static MouseEvent* enqueueMouseEvent(MouseEvent::MouseMsgType msgType, int rate = 0, int dx = 0, int dy = 0);
     static KeyboardEvent* enqueueKeybroadEvent(unsigned int keyCode, KeyboardEvent::KeyMsgType msgType);
+    static void updateCurrentPos();
 
     static HHOOK s_mouseHook;
     static HHOOK s_keybroadHook;
+    static int s_globalX;
+    static int s_globalY;
 };

@@ -1,11 +1,14 @@
 ﻿#include "hook.h"
 
 #include <iostream>
+#include <QCursor>
 
 #include "core/event/eventqueue.h"
 
 HHOOK Hook::s_mouseHook = NULL;
 HHOOK Hook::s_keybroadHook = NULL;
+int Hook::s_globalX = 0;
+int Hook::s_globalY = 0;
 
 Hook::Hook()
 {
@@ -14,47 +17,52 @@ Hook::Hook()
 
 LRESULT Hook::mouseProc(int nCode, WPARAM wParam, LPARAM lParam)
 {
+    bool bCallNext = false;
     if (nCode >= 0)
     {
         MSLLHOOKSTRUCT* mouseStruct = (MSLLHOOKSTRUCT*)lParam;
         switch (wParam)
         {
             case WM_LBUTTONDOWN:
-                std::cout << "左键按下" << std::endl;
+                enqueueMouseEvent(MouseEvent::MouseMsgType::LeftButtonDown);
                 break;
             case WM_LBUTTONUP:
-                std::cout << "左键抬起" << std::endl;
+                enqueueMouseEvent(MouseEvent::MouseMsgType::LeftButtonUp);
                 break;
             case WM_RBUTTONDOWN:
-                std::cout << "右键按下" << std::endl;
+                enqueueMouseEvent(MouseEvent::MouseMsgType::RightButtonDown);
                 break;
             case WM_RBUTTONUP:
-                std::cout << "右键抬起" << std::endl;
+                enqueueMouseEvent(MouseEvent::MouseMsgType::RightButtonUp);
                 break;
             case WM_MOUSEWHEEL:
-                std::cout << "滚轮滚动: " << GET_WHEEL_DELTA_WPARAM(mouseStruct->mouseData) << std::endl;
+                enqueueMouseEvent(MouseEvent::MouseMsgType::MouseWheel, GET_WHEEL_DELTA_WPARAM(mouseStruct->mouseData));
                 break;
             case WM_MOUSEMOVE:
-                std::cout << "鼠标移动：x=" << mouseStruct->pt.x << ", y=" << mouseStruct->pt.y << std::endl;
+				enqueueMouseEvent(MouseEvent::MouseMsgType::MouseMove, 0, mouseStruct->pt.x - s_globalX, mouseStruct->pt.y - s_globalY);
+				updateCurrentPos();
+                bCallNext = true;
                 break;
             default:
                 break;
         }
     }
 
-    // 传递事件给下一个钩子或默认处理
-    return CallNextHookEx(s_mouseHook, nCode, wParam, lParam);
+    if (bCallNext)
+        return CallNextHookEx(s_mouseHook, nCode, wParam, lParam);
+    return 1;
 }
 
 LRESULT Hook::keybroadProc(int nCode, WPARAM wParam, LPARAM lParam)
 {
-    return LRESULT();
+    return CallNextHookEx(s_keybroadHook, nCode, wParam, lParam);
 }
 
 MouseEvent* Hook::enqueueMouseEvent(MouseEvent::MouseMsgType msgType, int rate /*= 0*/, int dx /*= 0*/, int dy /*= 0*/)
 {
     auto event = new MouseEvent(msgType, rate, dx, dy);
     EventQueue::instance()->push(event);
+    std::cout << "enqueue: " << event->toString() << std::endl;
     return event;
 }
 
@@ -62,14 +70,25 @@ KeyboardEvent* Hook::enqueueKeybroadEvent(unsigned int keyCode, KeyboardEvent::K
 {
     auto event = new KeyboardEvent(keyCode, msgType);
 	EventQueue::instance()->push(event);
+    std::cout << "enqueue: " << event->toString() << std::endl;
 	return event;
+}
+
+void Hook::updateCurrentPos()
+{
+	QPoint globalPos = QCursor::pos();
+	s_globalX = globalPos.x();
+	s_globalY = globalPos.y();
 }
 
 bool Hook::installGlobalKeybroadHook()
 {
     s_keybroadHook = SetWindowsHookEx(WH_KEYBOARD_LL, Hook::keybroadProc, NULL, NULL);
     if (s_keybroadHook)
+    {
+        updateCurrentPos();
         return true;
+    }
     return false;
 }
 

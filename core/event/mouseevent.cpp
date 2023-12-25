@@ -64,6 +64,12 @@ void MouseEvent::post() const
     case MouseMsgType::LeftButtonClicked:
         leftButtonClicked();
         break;
+    case MouseMsgType::LeftButtonDown:
+        leftButtonDown();
+        break;
+    case MouseMsgType::LeftButtonUp:
+        leftButtonUp();
+        break;
     case MouseMsgType::LeftButtonDoubleClicked:
         leftButtonDoubleClicked();
         break;
@@ -77,6 +83,12 @@ void MouseEvent::post() const
         break;
     case MouseMsgType::RightButtonClicked:
         rightButtonClicked();
+        break;
+    case MouseMsgType::RightButtonDown:
+        rightButtonDown();
+        break;
+    case MouseMsgType::RightButtonUp:
+        rightButtonUp();
         break;
     default:
         break;

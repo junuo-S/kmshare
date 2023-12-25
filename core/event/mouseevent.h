@@ -7,7 +7,11 @@ public:
     {
         UnKnown,
         LeftButtonClicked,
+        LeftButtonDown,
+        LeftButtonUp,
         RightButtonClicked,
+        RightButtonDown,
+        RightButtonUp,
         MiddleButtonClicked,
         LeftButtonDoubleClicked,
         // RightButtonDoubleClicked, // 暂时不支持右键双击
