@@ -1,5 +1,7 @@
 ﻿#include "abstractevent.h"
 
+#include <QJsonObject>
+
 class MouseEvent : public AbstractEvent
 {
 public:
@@ -29,6 +31,9 @@ public:
     int getDy() const;
     virtual void post() const override;
     virtual std::string toString() override;
+    virtual std::string getClassName() const override;
+    static MouseEvent* fromJsonString(const std::string& json);
+    static MouseEvent* fromJsonObject(const QJsonObject& jsonObject);
 
 private:
     void leftButtonDown() const;

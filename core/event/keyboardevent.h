@@ -14,6 +14,7 @@ public:
     KeyMsgType getMsgType() const;
     virtual void post() const override;
     virtual std::string toString() override;
+    virtual std::string getClassName() const override;
 
 private:
     unsigned int m_keyCode;

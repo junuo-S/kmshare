@@ -63,4 +63,9 @@ std::string KeyboardEvent::toString()
     return jsonDoc.toJson().toStdString();
 }
 
+std::string KeyboardEvent::getClassName() const
+{
+    return "KeyboardEvent";
+}
+
 #endif
