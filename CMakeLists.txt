@@ -29,6 +29,11 @@ set(sources
     core/hook/hook.h
     core/hook/hook.cpp
 
+    core/network/kmshareserver.h
+    core/network/kmshareserver.cpp
+    core/network/kmshareclient.h
+    core/network/kmshareclient.cpp
+
     gui/kmsharewindow.h
     gui/kmsharewindow.cpp
     gui/subwidget/serverwidget.h
@@ -42,5 +47,5 @@ set(sources
 junuo_auto_moc(generateFiles ${sources})
 include_directories(.)
 junuo_add_executable(kmshare ${sources})
-junuo_use_Qt(kmshare Core Gui Widgets)
+junuo_use_Qt(kmshare Core Gui Widgets Network)
 junuo_add_generate_sources(kmshare ${generateFiles})
