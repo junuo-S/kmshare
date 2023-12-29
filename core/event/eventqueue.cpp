@@ -24,7 +24,8 @@ EventQueue::~EventQueue()
 void EventQueue::push(AbstractEvent *event)
 {
     std::lock_guard<std::mutex> guard(m_mutex);
-    return m_eventQueue.push(event);
+    m_eventQueue.push(event);
+    notifyAll();
 }
 
 void EventQueue::pop()
@@ -49,4 +50,15 @@ bool EventQueue::empty()
 {
     std::lock_guard<std::mutex> guard(m_mutex);
     return m_eventQueue.empty();
+}
+
+void EventQueue::waitForEvent()
+{
+    std::unique_lock<std::mutex> uniqueLock(m_mutex);
+    m_condition.wait(uniqueLock);
+}
+
+void EventQueue::notifyAll()
+{
+    m_condition.notify_all();
 }

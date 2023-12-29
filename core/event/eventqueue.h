@@ -16,6 +16,8 @@ public:
     AbstractEvent* front();
     AbstractEvent* back();
     bool empty();
+    void waitForEvent();
+    void notifyAll();
 
 protected:
     EventQueue() = default;
