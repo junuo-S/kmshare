@@ -9,6 +9,8 @@
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 
+class KMShareClient;
+
 class ClientWidget : public QWidget
 {
 public:
@@ -17,6 +19,8 @@ public:
 
 private:
 	void initUI();
+	void onConnectButtonClicked();
+	void onDisconnectButtonClicked();
 
 	QPushButton* m_connectButton = nullptr;
 	QPushButton* m_disconnectButton = nullptr;
@@ -30,4 +34,5 @@ private:
 	QHBoxLayout* m_buttonLayout = nullptr;
 	QVBoxLayout* m_vLayout = nullptr;
 	QVBoxLayout* m_groupVLayout = nullptr;
+	KMShareClient* m_kmshareClient = nullptr;
 };

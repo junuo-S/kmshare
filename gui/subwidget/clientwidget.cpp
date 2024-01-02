@@ -1,5 +1,7 @@
 ﻿#include "clientwidget.h"
 
+#include "core/network/kmshareclient.h"
+
 ClientWidget::ClientWidget(QWidget* parent /* = nullptr */)
 	: QWidget(parent)
 	, m_connectButton(new QPushButton(this))
@@ -14,8 +16,14 @@ ClientWidget::ClientWidget(QWidget* parent /* = nullptr */)
 	, m_buttonLayout(new QHBoxLayout(nullptr))
 	, m_vLayout(new QVBoxLayout(this))
 	, m_groupVLayout(new QVBoxLayout(m_groupBox))
+	, m_kmshareClient(new KMShareClient(this))
 {
 	initUI();
+	m_groupBox->setChecked(false);
+	m_ipEdit->setText("127.0.0.1");
+	m_portEdit->setText("9521");
+	connect(m_connectButton, &QPushButton::clicked, this, &ClientWidget::onConnectButtonClicked);
+	connect(m_disconnectButton, &QPushButton::clicked, this, &ClientWidget::onDisconnectButtonClicked);
 }
 
 ClientWidget::~ClientWidget()
@@ -55,4 +63,14 @@ void ClientWidget::initUI()
 	m_groupVLayout->addLayout(m_buttonLayout);
 
 	this->setLayout(m_vLayout);
+}
+
+void ClientWidget::onConnectButtonClicked()
+{
+	m_kmshareClient->connectToHost(m_ipEdit->text(), m_portEdit->text().toInt());
+}
+
+void ClientWidget::onDisconnectButtonClicked()
+{
+	m_kmshareClient->disconnectFromHost();
 }
