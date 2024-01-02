@@ -6,9 +6,11 @@
 QList<Device*> KMShareServer::s_deviceList;
 
 KMShareServer::KMShareServer(QObject* parent /*= nullptr*/)
-	: m_tcpServer(new QTcpServer(this))
+	: m_tcpServer(new STcpServer(this))
+	, m_sharingThread(new SharingThread(this))
 {
-	connect(m_tcpServer, &QTcpServer::newConnection, this, &KMShareServer::onNewConnection);
+	m_sharingThread->start();
+	connect(m_tcpServer, &STcpServer::newConnection, m_sharingThread, &SharingThread::addNewDevice, Qt::QueuedConnection);
 }
 
 KMShareServer::~KMShareServer()
@@ -76,14 +78,9 @@ void KMShareServer::stopSharing()
 	}
 }
 
-void KMShareServer::onNewConnection()
+void KMShareServer::onNewConnection(qintptr socketDescriptor)
 {
-	Device* device = new Device;
-	device->m_tcpSocket = m_tcpServer->nextPendingConnection();
-	device->m_address = device->m_tcpSocket->peerAddress().toString();
-	device->m_port = device->m_tcpSocket->peerPort();
-	device->m_deviceName = device->m_tcpSocket->peerName();
-	s_deviceList.append(device);
+	
 }
 
 KMShareServer::SharingThread::SharingThread(QObject* parent /*= nullptr*/)
@@ -95,7 +92,19 @@ KMShareServer::SharingThread::SharingThread(QObject* parent /*= nullptr*/)
 void KMShareServer::SharingThread::quit()
 {
 	m_isExit = true;
+	EventQueue::instance()->notifyAll();
 	QThread::quit();
+}
+
+void KMShareServer::SharingThread::addNewDevice(qintptr socketDescriptor)
+{
+	Device* device = new Device;
+	device->m_tcpSocket = new QTcpSocket(this);
+	device->m_tcpSocket->setSocketDescriptor(socketDescriptor);
+	device->m_address = device->m_tcpSocket->peerAddress().toString();
+	device->m_port = device->m_tcpSocket->peerPort();
+	device->m_deviceName = device->m_tcpSocket->peerName();
+	s_deviceList.append(device);
 }
 
 void KMShareServer::SharingThread::run()
@@ -113,9 +122,23 @@ void KMShareServer::SharingThread::run()
 			for (Device* device : s_deviceList)
 			{
 				if (device->m_needShare && device->isConnected())
+				{
 					device->m_tcpSocket->write(event->toString().c_str());
+					qDebug() << event->toString().c_str();
+				}
 			}
 			eventQueue->pop();
 		}
 	}
+}
+
+STcpServer::STcpServer(QObject* parent /*= nullptr*/)
+	: QTcpServer(parent)
+{
+
+}
+
+void STcpServer::incomingConnection(qintptr socketDescriptor)
+{
+	emit newConnection(socketDescriptor);
 }

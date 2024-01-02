@@ -4,6 +4,7 @@
 #include <QCursor>
 
 #include "core/event/eventqueue.h"
+#include "core/network/kmshareserver.h"
 
 HHOOK Hook::s_mouseHook = NULL;
 HHOOK Hook::s_keybroadHook = NULL;
@@ -24,22 +25,22 @@ LRESULT Hook::mouseProc(int nCode, WPARAM wParam, LPARAM lParam)
         switch (wParam)
         {
             case WM_LBUTTONDOWN:
-                enqueueMouseEvent(MouseEvent::MouseMsgType::LeftButtonDown);
+                shareMouseEvent(MouseEvent::MouseMsgType::LeftButtonDown);
                 break;
             case WM_LBUTTONUP:
-                enqueueMouseEvent(MouseEvent::MouseMsgType::LeftButtonUp);
+                shareMouseEvent(MouseEvent::MouseMsgType::LeftButtonUp);
                 break;
             case WM_RBUTTONDOWN:
-                enqueueMouseEvent(MouseEvent::MouseMsgType::RightButtonDown);
+                shareMouseEvent(MouseEvent::MouseMsgType::RightButtonDown);
                 break;
             case WM_RBUTTONUP:
-                enqueueMouseEvent(MouseEvent::MouseMsgType::RightButtonUp);
+                shareMouseEvent(MouseEvent::MouseMsgType::RightButtonUp);
                 break;
             case WM_MOUSEWHEEL:
-                enqueueMouseEvent(MouseEvent::MouseMsgType::MouseWheel, GET_WHEEL_DELTA_WPARAM(mouseStruct->mouseData));
+                shareMouseEvent(MouseEvent::MouseMsgType::MouseWheel, GET_WHEEL_DELTA_WPARAM(mouseStruct->mouseData));
                 break;
             case WM_MOUSEMOVE:
-				enqueueMouseEvent(MouseEvent::MouseMsgType::MouseMove, 0, mouseStruct->pt.x - s_globalX, mouseStruct->pt.y - s_globalY);
+                shareMouseEvent(MouseEvent::MouseMsgType::MouseMove, 0, mouseStruct->pt.x - s_globalX, mouseStruct->pt.y - s_globalY);
 				updateCurrentPos();
                 bCallNext = true;
                 break;
@@ -62,7 +63,6 @@ MouseEvent* Hook::enqueueMouseEvent(MouseEvent::MouseMsgType msgType, int rate /
 {
     auto event = new MouseEvent(msgType, rate, dx, dy);
     EventQueue::instance()->push(event);
-    std::cout << "enqueue: " << event->toString() << std::endl;
     return event;
 }
 
@@ -70,7 +70,20 @@ KeyboardEvent* Hook::enqueueKeybroadEvent(unsigned int keyCode, KeyboardEvent::K
 {
     auto event = new KeyboardEvent(keyCode, msgType);
 	EventQueue::instance()->push(event);
-    std::cout << "enqueue: " << event->toString() << std::endl;
+	return event;
+}
+
+MouseEvent* Hook::shareMouseEvent(MouseEvent::MouseMsgType msgType, int rate /*= 0*/, int dx /*= 0*/, int dy /*= 0*/)
+{
+	auto event = new MouseEvent(msgType, rate, dx, dy);
+    shareEvent(event);
+	return event;
+}
+
+KeyboardEvent* Hook::shareKeybroadEvent(unsigned int keyCode, KeyboardEvent::KeyMsgType msgType)
+{
+	auto event = new KeyboardEvent(keyCode, msgType);
+    shareEvent(event);
 	return event;
 }
 
@@ -79,6 +92,21 @@ void Hook::updateCurrentPos()
 	QPoint globalPos = QCursor::pos();
 	s_globalX = globalPos.x();
 	s_globalY = globalPos.y();
+}
+
+void Hook::shareEvent(AbstractEvent* event)
+{
+    if (!event)
+        return;
+    auto deviceList = KMShareServer::deviceList();
+	for (Device* device : deviceList)
+	{
+		if (device->m_needShare && device->isConnected())
+		{
+			device->m_tcpSocket->write(event->toString().c_str());
+		}
+	}
+    delete event;
 }
 
 bool Hook::installGlobalKeybroadHook()
