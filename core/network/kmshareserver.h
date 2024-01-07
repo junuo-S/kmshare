@@ -4,13 +4,9 @@
 #include <QTcpSocket>
 #include <QThread>
 
-struct Device
+class Device
 {
-	~Device()
-	{
-		delete m_tcpSocket;
-	}
-
+public:
 	bool isConnected() const 
 	{
 		return m_tcpSocket->state() == QAbstractSocket::ConnectedState;
@@ -21,20 +17,6 @@ struct Device
 	quint16 m_port = 0;
 	bool m_needShare = true;
 	QTcpSocket* m_tcpSocket = nullptr;
-};
-
-class STcpServer : public QTcpServer
-{
-	Q_OBJECT
-
-public:
-	STcpServer(QObject* parent = nullptr);
-
-signals:
-	void newConnection(qintptr socketDescriptor);
-
-protected:
-	virtual void incomingConnection(qintptr socketDescriptor) override;
 };
 
 class KMShareServer : public QObject
@@ -51,26 +33,9 @@ public:
 	void clearDeviceList();
 
 private:
-	class SharingThread : public QThread
-	{
-	public:
-		SharingThread(QObject* parent = nullptr);
-		void quit();
-		void addNewDevice(qintptr socketDescriptor);
-
-	protected:
-		virtual void run() override;
-
-	private:
-		bool m_isExit = false;
-	};
-
-	void onNewConnection(qintptr socketDescriptor);
-	void startSharing();
-	void stopSharing();
+	void onNewConnection();
 
 	static QList<Device*> s_deviceList;
 	quint16 m_port = 9521;
-	STcpServer* m_tcpServer = nullptr;
-	SharingThread* m_sharingThread = nullptr;
+	QTcpServer* m_tcpServer = nullptr;
 };
