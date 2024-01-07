@@ -13,6 +13,9 @@ public:
 	~KMShareWindow();
 
 private:
+	void onTurnOnServerMode(bool enable);
+	void onTurnOnClientMode(bool enable);
+
 	ClientWidget* m_clientWidget = nullptr;
 	ServerWidget* m_serverWidget = nullptr;
 	QVBoxLayout* m_vLayout = nullptr;

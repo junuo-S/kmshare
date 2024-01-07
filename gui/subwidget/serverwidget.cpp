@@ -24,13 +24,22 @@ ServerWidget::ServerWidget(QWidget* parent /*= nullptr*/)
 	m_groupBox->setChecked(false);
 	connect(m_sharingCheckBox, &QCheckBox::stateChanged, this, &ServerWidget::onSharingCheckBoxStateChanged);
 	connect(m_stopShareShortcut, &QShortcut::activated, this, &ServerWidget::onStopShortcutActivated);
-	connect(m_groupBox, &QGroupBox::clicked, this, &ServerWidget::serverMode);
+	connect(m_groupBox, &QGroupBox::toggled, this, &ServerWidget::serverMode);
 }
 
 ServerWidget::~ServerWidget()
 {
 	delete m_portHLayout;
 	delete m_statusHLayout;
+}
+
+void ServerWidget::setGroupBoxChecked(bool checked)
+{
+	if (!checked)
+	{
+		m_sharingCheckBox->setCheckState(Qt::Unchecked);
+	}
+	m_groupBox->setChecked(checked);
 }
 
 void ServerWidget::initUI()
@@ -97,5 +106,6 @@ void ServerWidget::serverMode(bool enable)
 	{
 		m_kmshareServer->close();
 	}
+	emit turnOnServerMode(enable);
 }
 

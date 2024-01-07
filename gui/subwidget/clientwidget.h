@@ -13,9 +13,15 @@ class KMShareClient;
 
 class ClientWidget : public QWidget
 {
+	Q_OBJECT
+
 public:
 	ClientWidget(QWidget* parent = nullptr);
 	~ClientWidget();
+	void setGroupBoxChecked(bool checked);
+
+signals:
+	void turnOnClientMode(bool enable);
 
 private:
 	void initUI();
@@ -23,7 +29,7 @@ private:
 	void onDisconnectButtonClicked();
 	void onTcpSocketConnected();
 	void onTcpSocketDisconnected();
-	void onGroupBoxClicked(bool checked = false);
+	void clientMode(bool enable);
 
 	QPushButton* m_connectButton = nullptr;
 	QPushButton* m_disconnectButton = nullptr;

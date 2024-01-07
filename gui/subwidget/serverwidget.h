@@ -14,9 +14,15 @@ class KMShareServer;
 
 class ServerWidget : public QWidget
 {
+	Q_OBJECT
+
 public:
 	ServerWidget(QWidget* parent = nullptr);
 	~ServerWidget();
+	void setGroupBoxChecked(bool checked);
+
+signals:
+	void turnOnServerMode(bool enable);
 
 private:
 	void initUI();

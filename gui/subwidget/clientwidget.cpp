@@ -26,12 +26,25 @@ ClientWidget::ClientWidget(QWidget* parent /* = nullptr */)
 	connect(m_kmshareClient, &KMShareClient::disconnected, this, &ClientWidget::onTcpSocketDisconnected);
 	connect(m_connectButton, &QPushButton::clicked, this, &ClientWidget::onConnectButtonClicked);
 	connect(m_disconnectButton, &QPushButton::clicked, this, &ClientWidget::onDisconnectButtonClicked);
+	connect(m_groupBox, &QGroupBox::toggled, this, &ClientWidget::clientMode);
 }
 
 ClientWidget::~ClientWidget()
 {
 	delete m_editLayout;
 	delete m_buttonLayout;
+}
+
+void ClientWidget::clientMode(bool enable)
+{
+	if (enable == false)
+		m_kmshareClient->close();
+	emit turnOnClientMode(enable);
+}
+
+void ClientWidget::setGroupBoxChecked(bool checked)
+{
+	m_groupBox->setChecked(checked);
 }
 
 void ClientWidget::initUI()
@@ -85,10 +98,4 @@ void ClientWidget::onTcpSocketConnected()
 void ClientWidget::onTcpSocketDisconnected()
 {
 	m_statusLabel->setText(tr("disconnected"));
-}
-
-void ClientWidget::onGroupBoxClicked(bool checked /*= false*/)
-{
-	if (checked == false)
-		m_kmshareClient->close();
 }

@@ -7,6 +7,11 @@
 class Device
 {
 public:
+	~Device()
+	{
+		delete m_tcpSocket;
+	}
+
 	bool isConnected() const 
 	{
 		return m_tcpSocket->state() == QAbstractSocket::ConnectedState;

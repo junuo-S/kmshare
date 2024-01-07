@@ -45,6 +45,7 @@ bool KMShareServer::listen()
 void KMShareServer::close()
 {
 	m_tcpServer->close();
+	clearDeviceList();
 }
 
 void KMShareServer::clearDeviceList()
