@@ -92,10 +92,10 @@ void ClientWidget::onDisconnectButtonClicked()
 
 void ClientWidget::onTcpSocketConnected()
 {
-	m_statusLabel->setText(tr("connected"));
+	m_statusLabel->setText(QString("%1: %2").arg(tr("status")).arg(tr("connected")));
 }
 
 void ClientWidget::onTcpSocketDisconnected()
 {
-	m_statusLabel->setText(tr("disconnected"));
+	m_statusLabel->setText(QString("%1: %2").arg(tr("status")).arg(tr("disconnected")));
 }
