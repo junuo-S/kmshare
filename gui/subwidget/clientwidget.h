@@ -21,6 +21,9 @@ private:
 	void initUI();
 	void onConnectButtonClicked();
 	void onDisconnectButtonClicked();
+	void onTcpSocketConnected();
+	void onTcpSocketDisconnected();
+	void onGroupBoxClicked(bool checked = false);
 
 	QPushButton* m_connectButton = nullptr;
 	QPushButton* m_disconnectButton = nullptr;

@@ -8,6 +8,8 @@ KMShareClient::KMShareClient(QObject* parent /*= nullptr*/)
 	: QObject(parent)
 	, m_tcpSocket(new QTcpSocket(this))
 {
+	connect(m_tcpSocket, &QTcpSocket::connected, this, &KMShareClient::onTcpSocketConnected);
+	connect(m_tcpSocket, &QTcpSocket::disconnected, this, &KMShareClient::onTcpSocketDisconnected);
 	connect(m_tcpSocket, &QTcpSocket::readyRead, this, &KMShareClient::onReadyRead);
 }
 
@@ -26,9 +28,24 @@ void KMShareClient::disconnectFromHost()
 	m_tcpSocket->disconnectFromHost();
 }
 
+void KMShareClient::close()
+{
+	m_tcpSocket->close();
+}
+
 void KMShareClient::onReadyRead()
 {
 	AbstractEvent* event = MouseEvent::fromJsonString(m_tcpSocket->readAll().toStdString());
 	if (event)
 		event->post();
+}
+
+void KMShareClient::onTcpSocketConnected()
+{
+	emit connected();
+}
+
+void KMShareClient::onTcpSocketDisconnected()
+{
+	emit disconnected();
 }

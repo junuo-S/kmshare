@@ -22,6 +22,8 @@ ClientWidget::ClientWidget(QWidget* parent /* = nullptr */)
 	m_groupBox->setChecked(false);
 	m_ipEdit->setText("127.0.0.1");
 	m_portEdit->setText("9521");
+	connect(m_kmshareClient, &KMShareClient::connected, this, &ClientWidget::onTcpSocketConnected);
+	connect(m_kmshareClient, &KMShareClient::disconnected, this, &ClientWidget::onTcpSocketDisconnected);
 	connect(m_connectButton, &QPushButton::clicked, this, &ClientWidget::onConnectButtonClicked);
 	connect(m_disconnectButton, &QPushButton::clicked, this, &ClientWidget::onDisconnectButtonClicked);
 }
@@ -73,4 +75,20 @@ void ClientWidget::onConnectButtonClicked()
 void ClientWidget::onDisconnectButtonClicked()
 {
 	m_kmshareClient->disconnectFromHost();
+}
+
+void ClientWidget::onTcpSocketConnected()
+{
+	m_statusLabel->setText(tr("connected"));
+}
+
+void ClientWidget::onTcpSocketDisconnected()
+{
+	m_statusLabel->setText(tr("disconnected"));
+}
+
+void ClientWidget::onGroupBoxClicked(bool checked /*= false*/)
+{
+	if (checked == false)
+		m_kmshareClient->close();
 }
