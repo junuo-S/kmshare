@@ -33,6 +33,7 @@ public:
 	quint16 port() const;
 	void setPort(qint16 port);
 	QString serverAddress() const;
+	QStringList getLocalIPv4Address() const;
 	bool listen();
 	void close();
 	void clearDeviceList();

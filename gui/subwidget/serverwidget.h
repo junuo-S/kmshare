@@ -9,6 +9,7 @@
 #include <QPushButton>
 #include <QCheckBox>
 #include <QShortcut>
+#include <QComboBox>
 
 class KMShareServer;
 
@@ -34,6 +35,7 @@ private:
 	QGroupBox* m_groupBox = nullptr;
 	QVBoxLayout* m_groupVLayout = nullptr;
 	QLabel* m_ipLabel = nullptr;
+	QComboBox* m_ipCombox = nullptr;
 	QLabel* m_statusLabel = nullptr;
 	QCheckBox* m_sharingCheckBox = nullptr;
 	QHBoxLayout* m_statusHLayout = nullptr;

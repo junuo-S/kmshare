@@ -8,6 +8,7 @@ ServerWidget::ServerWidget(QWidget* parent /*= nullptr*/)
 	, m_groupBox(new QGroupBox(this))
 	, m_groupVLayout(new QVBoxLayout(m_groupBox))
 	, m_ipLabel(new QLabel(this))
+	, m_ipCombox(new QComboBox(this))
 	, m_statusLabel(new QLabel(this))
 	, m_sharingCheckBox(new QCheckBox(this))
 	, m_statusHLayout(new QHBoxLayout(nullptr))
@@ -48,10 +49,14 @@ void ServerWidget::initUI()
 
 	m_groupBox->setCheckable(true);
 	m_groupBox->setTitle(tr("server mode"));
-	m_ipLabel->setText(QString("%1: %2").arg(tr("local ip")).arg("127.0.0.1"));
+	m_ipLabel->setText(tr("local ip"));
+	m_ipCombox->clear();
+	m_ipCombox->addItems(m_kmshareServer->getLocalIPv4Address());
+	m_ipCombox->setToolTip(tr("Possible IP addresses for this machine. If the connection fails, please try changing to another IP address"));
 	m_statusLabel->setText(tr("status"));
 	m_sharingCheckBox->setText(tr("sharing"));
 	m_statusHLayout->addWidget(m_ipLabel);
+	m_statusHLayout->addWidget(m_ipCombox);
 	m_statusHLayout->addStretch();
 	m_statusHLayout->addWidget(m_statusLabel);
 	m_statusHLayout->addWidget(m_sharingCheckBox);
@@ -74,6 +79,7 @@ void ServerWidget::setServerWidgetsEnable(bool enable)
 	m_portEdit->setEnabled(enable);
 	m_changePortButton->setEnabled(enable);
 	m_openDeviceListButton->setEnabled(enable);
+	m_ipCombox->setEnabled(enable);
 }
 
 void ServerWidget::onSharingCheckBoxStateChanged(int state)
@@ -99,6 +105,9 @@ void ServerWidget::serverMode(bool enable)
 {
 	if (enable)
 	{
+		m_ipLabel->setText(tr("local ip"));
+		m_ipCombox->clear();
+		m_ipCombox->addItems(m_kmshareServer->getLocalIPv4Address());
 		m_kmshareServer->setPort(m_portEdit->text().toInt());
 		m_kmshareServer->listen();
 	}

@@ -1,5 +1,7 @@
 ﻿#include "kmshareserver.h"
 
+#include <QNetworkInterface>
+
 #include "core/event/eventqueue.h"
 #include "core/event/abstractevent.h"
 
@@ -35,6 +37,44 @@ void KMShareServer::setPort(qint16 port)
 QString KMShareServer::serverAddress() const
 {
 	return m_tcpServer->serverAddress().toString();
+}
+
+QStringList KMShareServer::getLocalIPv4Address() const
+{
+	QStringList ipAddrs;
+	static QStringList virtualAdapters = { "VMware", "VirtualBox" };
+	for (const auto& _interface : QNetworkInterface::allInterfaces())
+	{
+		bool isVirtual = false;
+		for (const QString& adapter : virtualAdapters)
+		{
+			if (_interface.humanReadableName().contains(adapter, Qt::CaseInsensitive))
+			{
+				isVirtual = true;
+				break;
+			}
+		}
+		if (isVirtual) continue;
+
+		auto type = _interface.type();
+		if (type == QNetworkInterface::Ethernet
+			|| type == QNetworkInterface::Wifi)
+		{
+			auto allEntries = _interface.addressEntries();
+			for (const auto& entry : allEntries)
+			{
+				auto hostAddress = entry.ip();
+				if (hostAddress.protocol() == QAbstractSocket::IPv4Protocol
+					&& !hostAddress.isLoopback()
+					&& !hostAddress.isLinkLocal())
+				{
+					ipAddrs.append(hostAddress.toString());
+				}
+			}
+		}
+	}
+
+	return ipAddrs;
 }
 
 bool KMShareServer::listen()

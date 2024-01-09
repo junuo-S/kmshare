@@ -20,8 +20,6 @@ ClientWidget::ClientWidget(QWidget* parent /* = nullptr */)
 {
 	initUI();
 	m_groupBox->setChecked(false);
-	m_ipEdit->setText("127.0.0.1");
-	m_portEdit->setText("9521");
 	connect(m_kmshareClient, &KMShareClient::connected, this, &ClientWidget::onTcpSocketConnected);
 	connect(m_kmshareClient, &KMShareClient::disconnected, this, &ClientWidget::onTcpSocketDisconnected);
 	connect(m_connectButton, &QPushButton::clicked, this, &ClientWidget::onConnectButtonClicked);
@@ -57,6 +55,8 @@ void ClientWidget::initUI()
 	m_statusLabel->setText(QString("%1: %2").arg(tr("status")).arg(tr("disconnected")));
 	m_ipLabel->setText(tr("server ip"));
 	m_portLabel->setText(tr("port"));
+	m_ipEdit->setText("192.168.0.");
+	m_portEdit->setText("9521");
 	m_editLayout->addWidget(m_ipLabel);
 	m_editLayout->addWidget(m_ipEdit);
 	m_editLayout->addWidget(m_portLabel);
