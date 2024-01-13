@@ -1,7 +1,8 @@
 ﻿#include "hook.h"
 
-#include <iostream>
 #include <QCursor>
+#include <QApplication>
+#include <QScreen>
 
 #include "core/event/eventqueue.h"
 #include "core/network/kmshareserver.h"
@@ -10,6 +11,7 @@ HHOOK Hook::s_mouseHook = NULL;
 HHOOK Hook::s_keybroadHook = NULL;
 int Hook::s_globalX = 0;
 int Hook::s_globalY = 0;
+QTimer* Hook::s_timer = nullptr;
 
 Hook::Hook()
 {
@@ -40,8 +42,6 @@ LRESULT Hook::mouseProc(int nCode, WPARAM wParam, LPARAM lParam)
                 shareMouseEvent(MouseEvent::MouseMsgType::MouseWheel, GET_WHEEL_DELTA_WPARAM(mouseStruct->mouseData));
                 break;
             case WM_MOUSEMOVE:
-                shareMouseEvent(MouseEvent::MouseMsgType::MouseMove, 0, mouseStruct->pt.x - s_globalX, mouseStruct->pt.y - s_globalY);
-				updateCurrentPos();
                 bCallNext = true;
                 break;
             default:
@@ -80,6 +80,26 @@ MouseEvent* Hook::shareMouseEvent(MouseEvent::MouseMsgType msgType, int rate /*=
 	return event;
 }
 
+MouseEvent* Hook::shareMouseMoveEvent()
+{
+    int currentX = QCursor::pos().x();
+    int currentY = QCursor::pos().y();
+    updateCurrentPos();
+    if (currentX == s_globalX && currentY == s_globalY)
+        return nullptr;
+    int deltaX = QCursor::pos().x() - s_globalX;
+    int deltaY = QCursor::pos().y() - s_globalY;
+	s_globalX = QCursor::pos().x();
+	s_globalY = QCursor::pos().y();
+    static int screenWidth = qApp->primaryScreen()->size().width();
+    static int screenHeight = qApp->primaryScreen()->size().height();
+    static double threshold = 0.95;
+    if (std::abs(deltaX) > screenWidth * threshold || std::abs(deltaY) > screenHeight * threshold)
+        return nullptr;
+    auto event = shareMouseEvent(MouseEvent::MouseMsgType::MouseMove, 0, deltaX, deltaY);
+    return event;
+}
+
 KeyboardEvent* Hook::shareKeybroadEvent(unsigned int keyCode, KeyboardEvent::KeyMsgType msgType)
 {
 	auto event = new KeyboardEvent(keyCode, msgType);
@@ -90,8 +110,16 @@ KeyboardEvent* Hook::shareKeybroadEvent(unsigned int keyCode, KeyboardEvent::Key
 void Hook::updateCurrentPos()
 {
 	QPoint globalPos = QCursor::pos();
-	s_globalX = globalPos.x();
-	s_globalY = globalPos.y();
+    static QRect screenRect = qApp->primaryScreen()->geometry();
+    static int threshold = 10;
+    if (globalPos.y() < screenRect.top() + threshold)
+        QCursor::setPos(globalPos.x(), screenRect.bottom() - threshold);
+    else if (globalPos.y() > screenRect.bottom() - threshold)
+        QCursor::setPos(globalPos.x(), screenRect.top() + threshold);
+    if (globalPos.x() < screenRect.left() + threshold)
+        QCursor::setPos(screenRect.right() - threshold, globalPos.y());
+    else if (globalPos.x() > screenRect.right() - threshold)
+        QCursor::setPos(screenRect.left() + threshold, globalPos.y());
 }
 
 void Hook::shareEvent(AbstractEvent* event)
@@ -122,7 +150,13 @@ bool Hook::installGlobalKeybroadHook()
 
 bool Hook::installGlobalMouseHook()
 {
+    s_timer = new QTimer;
+    s_timer->setInterval(10);
+    QObject::connect(s_timer, &QTimer::timeout, Hook::shareMouseMoveEvent);
+    s_timer->start();
     s_mouseHook = SetWindowsHookEx(WH_MOUSE_LL, Hook::mouseProc, NULL, NULL);
+    s_globalX = QCursor::pos().x();
+    s_globalY = QCursor::pos().y();
     if (s_mouseHook)
         return true;
     return false;
@@ -136,4 +170,7 @@ void Hook::uninstallGlobalKeybroadHook()
 void Hook::uninstallGlobalMouseHook()
 {
     UnhookWindowsHookEx(s_mouseHook);
+    s_timer->stop();
+    delete s_timer;
+    s_timer = nullptr;
 }
