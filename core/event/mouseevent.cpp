@@ -4,6 +4,7 @@
 #include <Windows.h>
 #endif
 #include <QJsonDocument>
+#include <QCursor>
 
 MouseEvent::MouseEvent(MouseMsgType msgType, int rate, int dx, int dy)
     : m_msgType(msgType)
@@ -220,13 +221,6 @@ void MouseEvent::scrollWheel() const
 
 void MouseEvent::mouseMove() const
 {
-    POINT cursorPos;
-    GetCursorPos(&cursorPos); // 获取当前鼠标位置
-    INPUT input = {};
-    input.type = INPUT_MOUSE;
-    input.mi.dwFlags = MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_MOVE;
-    input.mi.dx = (cursorPos.x + m_dx) * 65536 / GetSystemMetrics(SM_CXSCREEN);
-    input.mi.dy = (cursorPos.y + m_dy) * 65536 / GetSystemMetrics(SM_CYSCREEN);
-    SendInput(1, &input, sizeof(INPUT));
+    QCursor::setPos(QCursor::pos() + QPoint(m_dx, m_dy));
 }
 #endif
