@@ -20,15 +20,15 @@ public:
         MouseMove,
         MouseWheel,
     };
-    explicit MouseEvent(MouseMsgType msgType, int rate = 0, int dx = 0, int dy = 0);
+    explicit MouseEvent(MouseMsgType msgType, int rate = 0, double dxPercent = 0, double dyPercent = 0);
     void setMsgType(MouseMsgType msgType);
     MouseMsgType getMsgType() const;
     void setRate(int rate);
     int getRate() const;
-    void setDx(int dx);
-    int getDx() const;
-    void setDy(int dy);
-    int getDy() const;
+    void setDxPercent(double dxPercent);
+    double getDxPercent() const;
+    void setDyPercent(double dyPercent);
+    double getDyPercent() const;
     virtual void post() const override;
     virtual std::string toString() override;
     virtual std::string getClassName() const override;
@@ -50,6 +50,6 @@ private:
     // 记录滚轮转动的速率
     int m_rate = 0;
     // 记录鼠标移动的情况
-    int m_dx = 0;
-    int m_dy = 0;
+    double m_dxPercent = 0;
+    double m_dyPercent = 0;
 };

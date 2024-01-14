@@ -5,12 +5,14 @@
 #endif
 #include <QJsonDocument>
 #include <QCursor>
+#include <QApplication>
+#include <QScreen>
 
-MouseEvent::MouseEvent(MouseMsgType msgType, int rate, int dx, int dy)
+MouseEvent::MouseEvent(MouseMsgType msgType, int rate, double dxPercent, double dyPercent)
     : m_msgType(msgType)
     , m_rate(rate)
-    , m_dx(dx)
-    , m_dy(dy)
+    , m_dxPercent(dxPercent)
+    , m_dyPercent(dyPercent)
 {
 }
 
@@ -34,24 +36,24 @@ int MouseEvent::getRate() const
     return m_rate;
 }
 
-void MouseEvent::setDx(int dx)
+void MouseEvent::setDxPercent(double dxPercent)
 {
-    this->m_dx = dx;
+    this->m_dxPercent = dxPercent;
 }
 
-int MouseEvent::getDx() const
+double MouseEvent::getDxPercent() const
 {
-    return m_dx;
+    return m_dxPercent;
 }
 
-void MouseEvent::setDy(int dy)
+void MouseEvent::setDyPercent(double dyPercent)
 {
-    this->m_dy = dy;
+    this->m_dyPercent = dyPercent;
 }
 
-int MouseEvent::getDy() const
+double MouseEvent::getDyPercent() const
 {
-    return m_dy;
+    return m_dyPercent;
 }
 
 #ifdef _WIN32
@@ -101,10 +103,10 @@ std::string MouseEvent::toString()
     json.insert("className", "MouseEvent");
     json.insert("m_msgType", (unsigned short)m_msgType);
     json.insert("m_rate", m_rate);
-    json.insert("m_dx", m_dx);
-    json.insert("m_dy", m_dy);
+    json.insert("m_dxPercent", m_dxPercent);
+    json.insert("m_dyPercent", m_dyPercent);
     QJsonDocument jsonDoc(json);
-    return jsonDoc.toJson().toStdString();
+    return jsonDoc.toJson().toStdString() + "split";
 }
 
 std::string MouseEvent::getClassName() const
@@ -127,9 +129,9 @@ MouseEvent* MouseEvent::fromJsonObject(const QJsonObject& jsonObject)
 
     MouseEvent::MouseMsgType msgType = static_cast<MouseEvent::MouseMsgType>(jsonObject.value("m_msgType").toInt());
     int rate = jsonObject.value("m_rate").toInt();
-    int dx = jsonObject.value("m_dx").toInt();
-    int dy = jsonObject.value("m_dy").toInt();
-    return new MouseEvent(msgType, rate, dx, dy);
+    double dxPercent = jsonObject.value("m_dxPercent").toDouble();
+    double dyPercent = jsonObject.value("m_dyPercent").toDouble();
+    return new MouseEvent(msgType, rate, dxPercent, dyPercent);
 }
 
 void MouseEvent::leftButtonDown() const
@@ -221,6 +223,8 @@ void MouseEvent::scrollWheel() const
 
 void MouseEvent::mouseMove() const
 {
-    QCursor::setPos(QCursor::pos() + QPoint(m_dx, m_dy));
+    static int screenWidth = qApp->primaryScreen()->geometry().width();
+    static int screenHeight = qApp->primaryScreen()->geometry().height();
+    QCursor::setPos(QCursor::pos() + QPoint(m_dxPercent * screenWidth, m_dyPercent * screenHeight));
 }
 #endif

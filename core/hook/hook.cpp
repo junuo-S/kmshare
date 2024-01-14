@@ -59,9 +59,9 @@ LRESULT Hook::keybroadProc(int nCode, WPARAM wParam, LPARAM lParam)
     return CallNextHookEx(s_keybroadHook, nCode, wParam, lParam);
 }
 
-MouseEvent* Hook::enqueueMouseEvent(MouseEvent::MouseMsgType msgType, int rate /*= 0*/, int dx /*= 0*/, int dy /*= 0*/)
+MouseEvent* Hook::enqueueMouseEvent(MouseEvent::MouseMsgType msgType, int rate /*= 0*/, double dxPercent /*= 0*/, double dyPercent /*= 0*/)
 {
-    auto event = new MouseEvent(msgType, rate, dx, dy);
+    auto event = new MouseEvent(msgType, rate, dxPercent, dyPercent);
     EventQueue::instance()->push(event);
     return event;
 }
@@ -73,30 +73,31 @@ KeyboardEvent* Hook::enqueueKeybroadEvent(unsigned int keyCode, KeyboardEvent::K
 	return event;
 }
 
-MouseEvent* Hook::shareMouseEvent(MouseEvent::MouseMsgType msgType, int rate /*= 0*/, int dx /*= 0*/, int dy /*= 0*/)
+MouseEvent* Hook::shareMouseEvent(MouseEvent::MouseMsgType msgType, int rate /*= 0*/, double dxPercent /*= 0*/, double dyPercent /*= 0*/)
 {
-	auto event = new MouseEvent(msgType, rate, dx, dy);
+	auto event = new MouseEvent(msgType, rate, dxPercent, dyPercent);
     shareEvent(event);
 	return event;
 }
 
 MouseEvent* Hook::shareMouseMoveEvent()
 {
+	static int screenWidth = qApp->primaryScreen()->size().width();
+	static int screenHeight = qApp->primaryScreen()->size().height();
+	static double threshold = 0.95;
+
     int currentX = QCursor::pos().x();
     int currentY = QCursor::pos().y();
     updateCurrentPos();
     if (currentX == s_globalX && currentY == s_globalY)
         return nullptr;
-    int deltaX = QCursor::pos().x() - s_globalX;
-    int deltaY = QCursor::pos().y() - s_globalY;
+    double deltaXPercent = (QCursor::pos().x() - s_globalX) * 1.0 / screenWidth;
+    double deltaYPercent = (QCursor::pos().y() - s_globalY) * 1.0 / screenHeight;
 	s_globalX = QCursor::pos().x();
 	s_globalY = QCursor::pos().y();
-    static int screenWidth = qApp->primaryScreen()->size().width();
-    static int screenHeight = qApp->primaryScreen()->size().height();
-    static double threshold = 0.95;
-    if (std::abs(deltaX) > screenWidth * threshold || std::abs(deltaY) > screenHeight * threshold)
+    if (std::abs(deltaXPercent) > threshold || std::abs(deltaYPercent) > threshold)
         return nullptr;
-    auto event = shareMouseEvent(MouseEvent::MouseMsgType::MouseMove, 0, deltaX, deltaY);
+    auto event = shareMouseEvent(MouseEvent::MouseMsgType::MouseMove, 0, deltaXPercent, deltaYPercent);
     return event;
 }
 
