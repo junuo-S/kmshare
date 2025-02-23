@@ -18,7 +18,7 @@ ServerWidget::ServerWidget(QWidget* parent /*= nullptr*/)
 	, m_portHLayout(new QHBoxLayout(nullptr))
 	, m_openDeviceListButton(new QPushButton(this))
 	, m_vLayout(new QVBoxLayout(this))
-	, m_stopShareShortcut(new QShortcut(Qt::CTRL + Qt::ALT + Qt::Key_S, this))
+	, m_stopShareShortcut(new QShortcut(QKeySequence("Ctrl+Alt+s"), this))
 	, m_kmshareServer(new KMShareServer(this))
 {
 	initUI();

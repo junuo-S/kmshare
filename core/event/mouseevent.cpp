@@ -56,7 +56,6 @@ double MouseEvent::getDyPercent() const
     return m_dyPercent;
 }
 
-#ifdef _WIN32
 void MouseEvent::post() const
 {
     if (m_msgType == MouseMsgType::UnKnown)
@@ -136,62 +135,22 @@ MouseEvent* MouseEvent::fromJsonObject(const QJsonObject& jsonObject)
 
 void MouseEvent::leftButtonDown() const
 {
-    POINT cursorPos;
-    GetCursorPos(&cursorPos); // 获取当前鼠标位置
-
-    INPUT input = { 0 };
-
-    // 鼠标按下
-    input.type = INPUT_MOUSE;
-    input.mi.dwFlags = MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_MOVE | MOUSEEVENTF_LEFTDOWN;
-    input.mi.dx = cursorPos.x * 65536 / GetSystemMetrics(SM_CXSCREEN);
-    input.mi.dy = cursorPos.y * 65536 / GetSystemMetrics(SM_CYSCREEN);
-    SendInput(1, &input, sizeof(INPUT));
+    mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
 }
 
 void MouseEvent::rightButtonDown() const
 {
-    POINT cursorPos;
-    GetCursorPos(&cursorPos); // 获取当前鼠标位置
-
-    INPUT input = { 0 };
-
-    // 鼠标按下
-    input.type = INPUT_MOUSE;
-    input.mi.dwFlags = MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_MOVE | MOUSEEVENTF_RIGHTDOWN;
-    input.mi.dx = cursorPos.x * 65536 / GetSystemMetrics(SM_CXSCREEN);
-    input.mi.dy = cursorPos.y * 65536 / GetSystemMetrics(SM_CYSCREEN);
-    SendInput(1, &input, sizeof(INPUT));
+    mouse_event(MOUSEEVENTF_RIGHTDOWN, 0, 0, 0, 0);
 }
 
 void MouseEvent::leftButtonUp() const
 {
-    POINT cursorPos;
-    GetCursorPos(&cursorPos); // 获取当前鼠标位置
-
-    INPUT input = { 0 };
-
-    // 鼠标抬起
-    input.type = INPUT_MOUSE;
-    input.mi.dwFlags = MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_MOVE | MOUSEEVENTF_LEFTUP;
-    input.mi.dx = cursorPos.x * 65536 / GetSystemMetrics(SM_CXSCREEN);
-    input.mi.dy = cursorPos.y * 65536 / GetSystemMetrics(SM_CYSCREEN);
-    SendInput(1, &input, sizeof(INPUT));
+    mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
 }
 
 void MouseEvent::rightButtonUp() const
 {
-    POINT cursorPos;
-    GetCursorPos(&cursorPos); // 获取当前鼠标位置
-
-    INPUT input = { 0 };
-
-    // 鼠标抬起
-    input.type = INPUT_MOUSE;
-    input.mi.dwFlags = MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_MOVE | MOUSEEVENTF_RIGHTUP;
-    input.mi.dx = cursorPos.x * 65536 / GetSystemMetrics(SM_CXSCREEN);
-    input.mi.dy = cursorPos.y * 65536 / GetSystemMetrics(SM_CYSCREEN);
-    SendInput(1, &input, sizeof(INPUT));
+    mouse_event(MOUSEEVENTF_RIGHTUP, 0, 0, 0, 0);
 }
 
 void MouseEvent::leftButtonClicked() const
@@ -214,17 +173,17 @@ void MouseEvent::leftButtonDoubleClicked() const
 
 void MouseEvent::scrollWheel() const
 {
-    INPUT input = {};
-    input.type = INPUT_MOUSE;
-    input.mi.dwFlags = MOUSEEVENTF_WHEEL;
-    input.mi.mouseData = m_rate;
-    SendInput(1, &input, sizeof(INPUT));
+    mouse_event(MOUSEEVENTF_WHEEL, 0, 0, m_rate, 0);
 }
 
 void MouseEvent::mouseMove() const
 {
     static int screenWidth = qApp->primaryScreen()->geometry().width();
     static int screenHeight = qApp->primaryScreen()->geometry().height();
-    QCursor::setPos(QCursor::pos() + QPoint(m_dxPercent * screenWidth, m_dyPercent * screenHeight));
+    QPoint currentPos = QCursor::pos();
+#ifdef _WIN32
+    mouse_event(MOUSEEVENTF_MOVE, m_dxPercent * screenWidth, m_dyPercent * screenHeight, 0, 0);
+#else
+    QCursor::setPos(currentPos + QPoint(m_dxPercent * screenWidth, m_dyPercent * screenHeight));
+#endif // _WIN32
 }
-#endif

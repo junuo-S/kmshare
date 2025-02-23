@@ -38,11 +38,17 @@ void KMShareClient::onReadyRead()
 	// 因为mousemove一般比较快，所以必须要处理TCP粘包，不然多个事件粘在一起无法响应
 	QString bufferString = m_tcpSocket->readAll();
 	QStringList eventStringList = bufferString.split("split");
-	for (QString eventString: eventStringList)
+	for (const QString& eventString: eventStringList)
 	{
+		if (eventString.isEmpty())
+			continue;
+		qDebug() << eventString;
 		AbstractEvent* event = MouseEvent::fromJsonString(eventString.toStdString());
 		if (event)
+		{
+			qDebug() << "posted";
 			event->post();
+		}
 	}
 }
 

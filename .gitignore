@@ -4,6 +4,7 @@ release*/
 output*/
 cmake*/
 .vscode/
+.idea/
 
 *.exe
 *.dll
